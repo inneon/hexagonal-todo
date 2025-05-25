@@ -1,0 +1,26 @@
+{
+  "name": "@hexagonal-todo/hexagonal-todo-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "name": "hexagonal-todo-e2e",
+    "implicitDependencies": [
+      "hexagonal-todo"
+    ],
+    "targets": {
+      "e2e": {
+        "executor": "@nx/jest:jest",
+        "outputs": [
+          "{projectRoot}/test-output/jest/coverage"
+        ],
+        "options": {
+          "jestConfig": "apps/hexagonal-todo-e2e/jest.config.ts",
+          "passWithNoTests": true
+        },
+        "dependsOn": [
+          "hexagonal-todo:build"
+        ]
+      }
+    }
+  }
+}

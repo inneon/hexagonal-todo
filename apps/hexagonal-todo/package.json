@@ -1,0 +1,78 @@
+{
+  "name": "@hexagonal-todo/hexagonal-todo",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "name": "hexagonal-todo",
+    "targets": {
+      "build": {
+        "executor": "@nx/esbuild:esbuild",
+        "outputs": [
+          "{options.outputPath}"
+        ],
+        "defaultConfiguration": "production",
+        "options": {
+          "platform": "node",
+          "outputPath": "apps/hexagonal-todo/dist",
+          "format": [
+            "cjs"
+          ],
+          "bundle": false,
+          "main": "apps/hexagonal-todo/src/main.ts",
+          "tsConfig": "apps/hexagonal-todo/tsconfig.app.json",
+          "assets": [
+            "apps/hexagonal-todo/src/assets"
+          ],
+          "esbuildOptions": {
+            "sourcemap": true,
+            "outExtension": {
+              ".js": ".js"
+            }
+          }
+        },
+        "configurations": {
+          "development": {},
+          "production": {
+            "generateLockfile": true,
+            "esbuildOptions": {
+              "sourcemap": false,
+              "outExtension": {
+                ".js": ".js"
+              }
+            }
+          }
+        }
+      },
+      "serve": {
+        "executor": "@nx/js:node",
+        "defaultConfiguration": "development",
+        "dependsOn": [
+          "build"
+        ],
+        "options": {
+          "buildTarget": "hexagonal-todo:build",
+          "runBuildTargetDependencies": false
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "hexagonal-todo:build:development"
+          },
+          "production": {
+            "buildTarget": "hexagonal-todo:build:production"
+          }
+        }
+      },
+      "test": {
+        "options": {
+          "passWithNoTests": true
+        }
+      },
+      "docker-build": {
+        "dependsOn": [
+          "build"
+        ],
+        "command": "docker build -f apps/hexagonal-todo/Dockerfile . -t hexagonal-todo"
+      }
+    }
+  }
+}
