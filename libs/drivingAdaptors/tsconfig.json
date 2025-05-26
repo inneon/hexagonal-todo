@@ -4,6 +4,9 @@
   "include": [],
   "references": [
     {
+      "path": "../drivingPorts"
+    },
+    {
       "path": "./tsconfig.lib.json"
     },
     {
