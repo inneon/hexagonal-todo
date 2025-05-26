@@ -16,5 +16,22 @@
     "eslint.config.js",
     "eslint.config.cjs",
     "eslint.config.mjs"
+  ],
+  "references": [
+    {
+      "path": "../../libs/drivingAdaptors/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/domain/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/drivenAdaptors/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/drivenPorts/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/drivingPorts/tsconfig.lib.json"
+    }
   ]
 }

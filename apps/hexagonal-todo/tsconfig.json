@@ -4,6 +4,21 @@
   "include": [],
   "references": [
     {
+      "path": "../../libs/drivingAdaptors"
+    },
+    {
+      "path": "../../libs/domain"
+    },
+    {
+      "path": "../../libs/drivenAdaptors"
+    },
+    {
+      "path": "../../libs/drivenPorts"
+    },
+    {
+      "path": "../../libs/drivingPorts"
+    },
+    {
       "path": "./tsconfig.app.json"
     },
     {
