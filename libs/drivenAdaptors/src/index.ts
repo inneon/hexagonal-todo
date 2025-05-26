@@ -1,1 +1,1 @@
-export * from './lib/driven-adaptors.js';
+export * from './lib/inMemoryTodoPersistence';
