@@ -23,11 +23,11 @@ Instability is a little harder to intuit. It is basically a measure of how hard 
 - Outgoing coupling (also called efferent coupling) is the number of references within one module to any code (abstract or concrete) to another module.
 - Incoming coupling (also called afferent coupling) is the converse - it is the number of reference that code is referenced within another module.
 
-_(Note that in the majority of the literature Outgoing coupling is often called efferent coupling and Incoming coupling is often called afferent coupling. I think these names are terrible because they sound so similar, and because afferent and efferent are so infrequently used that most people don't know what they mean - so I have just gone with Outgoing/Incoming.)_
+_(Note that in the majority of the literature Outgoing coupling is often called efferent coupling and Incoming coupling is often called afferent coupling. I really do not like these names because they sound so similar, and because afferent and efferent are so infrequently used that most people don't know what they mean - so I have just gone with Outgoing/Incoming.)_
 
 In the example below `My Module` has an outgoing coupling of 3 (on `x`, `y` and `z`), and an incoming coupling of 2 (from `a` and `b`).
 
-![incoming and outgoing coupling](./incomingOutgoingCoupling.png)
+![Diagram showing 'My Module' with incoming coupling from A and B and outgoing coupling to X, Y and Z](./incomingOutgoingCoupling.png)
 
 Instability for a module is the ratio of incoming to outgoing coupling, and is defined as
 
@@ -41,7 +41,7 @@ High instability _can_ make managing changes hard to code, reason about, and inc
 
 Finally, we come to the main sequence. It is defined as a trailing diagonal along the space of combinations of abstractness and instability, as well as some of the area either side (shown in green below). The claim in Clean Architecture is that: ideally modules should sit somewhere on or near to this sequence. Doing so will encourage us to rely more heavily on high stability code and have fewer dependencies on lower stability code. (Though it is important to note that 'high stability code' here doesn't necessarily mean code that is stable - that is with low churn - just the very specific 'stability' mentioned above.)
 
-![the main sequence](./MainSequenceGraph.png)
+![Graph of Instability vs Abstractness with main-sequence along the trailing diagonal](./MainSequenceGraph.png)
 
 The Clean Architecture book also defines two other areas:
 
@@ -49,6 +49,8 @@ The Clean Architecture book also defines two other areas:
 - The Zone of Pain (in red above). These modules are not very abstract (they have mainly concrete classes), and have low instability (they are relied on by a lot). Changes in these modules can have affects on many other modules and be painful to change.
 
 ## This repository and its metrics
+
+To test the hypothesis I cam up with the simplest repo I could: a Todo-App hosted in Express and with Persistence (in the loosest sense of the word) handled in memory with an associative map. The application is not yet even complete, but I think this should at least give an indication.
 
 This mono-repo uses a Ports and Adaptors style, and the modules that I will be concerned with are the main projects that make it up. They are:
 
@@ -61,7 +63,7 @@ This mono-repo uses a Ports and Adaptors style, and the modules that I will be c
 
 The diagram show which modules depend on which others:
 
-![Ports and adaptors dependencies](./P&ADependencies.png)
+![Standard ports and adaptors dependencies tree](./P&ADependencies.png)
 
 ### Metrics
 
@@ -76,7 +78,7 @@ This table shows the metrics for each of the modules, and the graph shows where 
 | Driven ports     | 3                  | 0                  | 1            | 8                 | 0                 | 0           |
 | Driven adaptors  | 0                  | 2                  | 0            | 2                 | 3                 | 0.6         |
 
-![Metrics on a graph](./MainSequenceWithModules.png)
+![Metrics on main sequence graph of the numbers above](./MainSequenceWithModules.png)
 
 ## Analysis and thoughts
 
@@ -84,20 +86,27 @@ The first thing that I notice is quite how binary the abstractness metric is; al
 
 On a positive note, the second thing that I noticed is that there is a general correlation of the modules and the main sequence. The Application, Driven- and Driving ports fit exactly on the line and line and in opposite corners. As above, I would expect some drift as an application gets more involved.
 
-Interestingly both Driven- and Driving adaptors fall into the Zone of Pain. In my naivety I had not expected this. I do not know what this means yet. However, 4 out of 6 modules did fall within a reasonable zone.
+Interestingly both Driven- and Driving adaptors fall into the Zone of Pain. In my naivety I had not expected this. I have some thoughts having seen the results:
+
+- Maybe the adaptors are painful. They represent the interface between the clean domain logic and the messy real world.
+  - The [NDepends blog](https://blog.ndepend.com/abstractness-entering-zone-pain/) (a .NET tool for these metrics), suggests two ways of digging oneself out of the zone of pain: adding abstractness (e.g. more interfaces), and reducing the dependency footprint. Adding interfaces seems counter-productive when the reason the module exists is to provide concrete implementations of the ports. Similarly it is only depended on by the application so there is little chance to decrease this - so maybe it is where it is.
+  - Much of the literature suggests the big pain for these modules is the pain of change. This definitely resonates with my experience of persistence parts of adaptors: while _adding_ a table or column to a database is simple, _altering_ an existing schema (and migrating the data) tends to be a lot more painful. I do not think I can solve that fundamental problem with a pretty little graph and some metrics.
+- My adaptors are very simplistic. Maybe by the time that they include database libraries, HTTP calls to other services, and logging and monitoring libraries the instability gets increased and the modules find themselves closer to the main sequence. (Though, on the converse, maybe some other modules would get pushed into less favourable positions as they get fleshed out.)
+- In general modules are much more likely to fall into the Zone of Pain than the Zone of Uselessness. Maybe some modules just fall there despite having well thought out modules.
+
+However, 4 out of 6 modules did fall within a reasonable zone. I would say this is a success.
 
 To me this is all unsurprising. The idea of having modules on the main sequence is an architectural pairing to the OOP idea of "rely on abstractions, not on concretes" (i.e. [the D in SOLID](https://medium.com/@inzuael/solid-dependency-inversion-principle-part-5-f5bec43ab22e)). Modules which are relied on are further down in the graph, and modules which have more abstractions are more right. The natural consequence of following the D at a module level would be to follow the main sequence. Ports and Adaptors is one architectural framework that will encourage this, and possibly push the abstractness metric to the extremes.
 
 ## Conclusions
 
-Ports and Adaptors does seem to create modules that fall favourably close to the main sequence, at least for a simple repository. Assuming that falling within this zone is good (a discussion well outside this post) the Ports and Adaptors should help lead to well-structured code.
-
-The fact that modules fall towards the main sequence as a natural consequence of following Ports and Adaptors means that monitoring these metrics is not too important.
+Ports and Adaptors does seem to create modules that fall favourably close to the main sequence, at least for a simple repository. Assuming that falling within this zone is good (a discussion well outside this post) the Ports and Adaptors should help lead to well-structured code. The fact that modules fall towards the main sequence as a natural consequence of following Ports and Adaptors means that monitoring these metrics is not too important.
 
 ## Criticisms
 
 While I like Ports and Adaptors, and how they fit with the Main Sequence metrics there are some ways where I think it could not work:
 
-- In general reducing coupling is generally good - doing so makes it easier to trace how changes will affect outside modules. Whereas the stability metric only captures the percentages of incoming and outgoing coupling.
-- I would also be careful adhering to the metrics too closely. I think if I as a developer had the metrics in mind while I was developing I may make choices based on the metrics instead of what I thought was genuinely was the best. E.g. if I was developing in the Driven adaptors package would I think to myself, "If I just make a xyz an interface instead of a simple class, then it would move slightly closer to the green area"?
-- I don't know of any tools for collecting these metrics within a Javascript/Typescript project, though maybe that is for the best given the criticism above. In the example above I just counted by hand.
+1. In general reducing coupling is generally good - doing so makes it easier to trace how changes will affect outside modules. Whereas the stability metric only captures the percentages of incoming and outgoing coupling.
+2. I would also be careful adhering to the metrics too closely. I think if I as a developer had the metrics in mind while I was developing I may make choices based on the metrics instead of what I thought was genuinely was the best. E.g. if I was developing in the Driven adaptors package would I think to myself, "If I just make a xyz an interface instead of a simple class, then it would move slightly closer to the green area"?
+3. Ports and Adaptors naturally hides some of the implicit coupling between the Domain and Driven adaptors. While there are no code links between the two, it is still possible to accidentally leak domain logic into the persistence. For example, putting a unique constraint on a column is a database functionality and would live in the Driven adaptor. Doing so may help the database to optimise queries, but developers would still need to be mindful to enforce uniqueness at the domain level and not delegate this logic to the adaptors. Forgetting to do so would leave the uniqueness constraint unenforced if the persistence layer would be changed. This type of coupling is not captured by Instability.
+4. I don't know of any tools for collecting these metrics within a Javascript/Typescript project, though maybe that is for the best given point 2. In the example above I just counted by hand. Maybe a further blog post will focus on creating a NX plugin for measuring them.
