@@ -1,6 +1,24 @@
 import { ForManagingTodos } from '@hexagonal-todo/drivingPorts';
 import express from 'express';
 
+export const startTodoExpressService = (
+  forManagingTodos: ForManagingTodos,
+  host: string,
+  port: number
+) => {
+  const app = express();
+  app.use(express.json());
+
+  const todoRouter = todoExpressWrapper(forManagingTodos);
+  app.use('/todo', todoRouter);
+
+  app.listen(port, host, () => {
+    console.log(`[ ready ] http://${host}:${port}`);
+  });
+
+  return app;
+};
+
 export const todoExpressWrapper = (
   forManagingTodos: ForManagingTodos
 ): express.Router => {
