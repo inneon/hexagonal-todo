@@ -33,13 +33,13 @@ Instability for a module is the ratio of incoming to outgoing coupling, and is d
 
 $$Instability = \frac{C_{out}}{C_{in} + C_{out}}$$
 
-In the above example this is 3/(3+2) = 0.6 , so a medium instability. It shows how stable a module will be as a result of upstream changes. Modules with high instability will be more unstable do to changes upstream rippling out and affecting them. Conversely, modules with low instability are less likely to be affected by upstream changes.
+In the above example this is 3/(3+2) = 0.6 , so a medium instability. It shows how stable a module will be as a result of upstream changes. Modules with high instability will be more unstable do to changes upstream rippling out and affecting them. Conversely, modules with low instability are less likely to be affected by upstream changes. (It is important to note that 'high stability code' here doesn't necessarily mean code that is stable - that is with low churn - I think that it is just the case that naming things is hard.)
 
 High instability _can_ make managing changes hard to code, reason about, and increase the testing area. Ultimately, some module(s) will be the root(s) of application(s) and so will have high instability - if some module has incoming coupling then the other end of that dependency must have outgoing coupling. High instability is not bad in itself, but is something to be aware of.
 
 ## The main sequence
 
-Finally, we come to the main sequence. It is defined as a trailing diagonal along the space of combinations of abstractness and instability, as well as some of the area either side (shown in green below). The claim in Clean Architecture is that: ideally modules should sit somewhere on or near to this sequence. Doing so will encourage us to rely more heavily on high stability code and have fewer dependencies on lower stability code. (Though it is important to note that 'high stability code' here doesn't necessarily mean code that is stable - that is with low churn - just the very specific 'stability' mentioned above.)
+Finally, we come to the main sequence. It is defined as a trailing diagonal along the space of combinations of abstractness and instability, as well as some of the area either side (shown in green below). The claim in Clean Architecture is that: ideally modules should sit somewhere on or near to this sequence. Doing so will encourage us to rely more heavily on high stability code and have fewer dependencies on lower stability code.
 
 ![Graph of Instability vs Abstractness with main-sequence along the trailing diagonal](./MainSequenceGraph.png)
 
@@ -92,6 +92,7 @@ Interestingly both Driven- and Driving adaptors fall into the Zone of Pain. In m
   - The [NDepends blog](https://blog.ndepend.com/abstractness-entering-zone-pain/) (a .NET tool for these metrics), suggests two ways of digging oneself out of the zone of pain: adding abstractness (e.g. more interfaces), and reducing the dependency footprint. Adding interfaces seems counter-productive when the reason the module exists is to provide concrete implementations of the ports. Similarly it is only depended on by the application so there is little chance to decrease this - so maybe it is where it is.
   - Much of the literature suggests the big pain for these modules is the pain of change. This definitely resonates with my experience of persistence parts of adaptors: while _adding_ a table or column to a database is simple, _altering_ an existing schema (and migrating the data) tends to be a lot more painful. I do not think I can solve that fundamental problem with a pretty little graph and some metrics.
 - My adaptors are very simplistic. Maybe by the time that they include database libraries, HTTP calls to other services, and logging and monitoring libraries the instability gets increased and the modules find themselves closer to the main sequence. (Though, on the converse, maybe some other modules would get pushed into less favourable positions as they get fleshed out.)
+  - Similarly, as the domain gets more complex it will require more complex ports, and therefore more complex adaptors implementing them. This will increase the outward coupling of the adaptors, while the inward coupling will remain relatively static due to the whole application neededing to be setup just once no matter how complex it is. This would also push the instability up.
 - In general modules are much more likely to fall into the Zone of Pain than the Zone of Uselessness. Maybe some modules just fall there despite having well thought out modules.
 
 However, 4 out of 6 modules did fall within a reasonable zone. I would say this is a success.
@@ -101,6 +102,8 @@ To me this is all unsurprising. The idea of having modules on the main sequence 
 ## Conclusions
 
 Ports and Adaptors does seem to create modules that fall favourably close to the main sequence, at least for a simple repository. Assuming that falling within this zone is good (a discussion well outside this post) the Ports and Adaptors should help lead to well-structured code. The fact that modules fall towards the main sequence as a natural consequence of following Ports and Adaptors means that monitoring these metrics is not too important.
+
+The code for this blog post is hosted in [GitHub](https://github.com/inneon/hexagonal-todo).
 
 ## Criticisms
 
